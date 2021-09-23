@@ -36,14 +36,16 @@
 
 2- Les fichiers commencant par un "." ne sont pas affichés via 'ls' mais via 'la'.
 
-3- Le programme 'ls' se situe dans "/usr/bin/ls"
+3- Le programme 'ls' se situe dans "/usr/bin/ls".
+
 4- Il n'y a pas d'entrée pour 'll', car il s'agit d'un alias créé pour 'ls -l'.
 
 5- La commande pour afficher le contenu du dossier "bin" est 'ls /bin'.
 
 6- La commande 'ls' liste le contenu du répertoire actuel, hors fichiers et dossiers cachés.
 
-7- La commande "pwd" donne le chemin complet du dossier courant
+7- La commande "pwd" donne le chemin complet du dossier courant.
+
 8- La commande 'echo 'bip' > plop' crée un fichier "plop" et le remplit avec le contenu à afficher. Il écrase également toute donnée précédente.
 
 9- La commande ""echo 'bip' >> plop" écrit à la suite du fichier passé en paremètre, ici deux fois "plop" à la fin du fichier plop.
@@ -68,7 +70,8 @@
 
 19- La commande 'wc -l /etc/passwd' permet d'afficher le nombre d'utilisateurs ayant un compte sur la machine.
 
-20- La commande 'apropos -e conversion | wc -l' permet de compter le nombre de pages de manuel ayant le mot-clé "conversion" dans leur description
+20- La commande 'apropos -e conversion | wc -l' permet de compter le nombre de pages de manuel ayant le mot-clé "conversion" dans leur description.
+
 21- La commande 'find passwd' permet de rechercher tout les fichiers nommés passwd sur la machine.
 
 22- La commande 'find passwd >>~/list_passwd_files.txt 2>>/dev/null' permet de rechercher tout les fichiers nommés passwd sur la machine et de les rediriger séparément.
