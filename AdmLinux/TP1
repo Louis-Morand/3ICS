@@ -1,1 +1,59 @@
+### Louis MORAND
+# **Administration système** 
+## TP1 - Installation d’Ubuntu Server et prise en main du shell
 
+### Exercice 2 - Prise en main de l’interpréteur de commandes  
+
+#### Manuel
+
+1- La commande 'wich' permet d'afficher le chemin de chacune des commandes passées en paramètre.
+2- On peux utiliser la commande '/COMMANDE' pour rechercher des termes dans le manuel
+3- On peux quitter le manuel en appuyant sur 'Q'
+4- La commande "man commande.X" permet d'accéder à la section X de la commande
+
+### Navigation dans l’arborescence des fichiers
+
+4- On peux revenir au dossier précédent sans utiliser de chemin via la commande "cd -"
+5- Nous n'avons pas les permissions d'accéder au dossier /root en tant qu'utilisateur sans élévation
+6- La commande "sudo cd /root" ne fonctionne pas, car cd est une commande du shell et non un exécutable, et sudo ne fonctionne que pour élever des programmes exécutables 
+8- La commande "rm Fichier1" et "rm Dossier1" ne fonctionnent pas en étant à la racine, car Fichier1 n'est pas dans le répertoire courant et Dossier1 n'est pas un fichier, 'rm' sans autres paramètres supprime uniquement des fichiers
+9- La commande permettant de supprimer un dossier est "rm -r Dossier1"
+10- La commande 'rm' appliqué à Dossier2 est refusée car ce dossier n'est pas vide
+11-La commande "rm -r Dossier2" supprime Dossier2 et tout son contenu
+
+### Commandes importantes
+
+1- La commande "date permet d'afficher l'heure. La commande 'time' permet de montrer l'utilisation système (soit, les ressources et le temps d'exécution) d'une comande passée en paramètre
+2- Les fichiers commencant par un "." ne sont pas affichés via 'ls' mais via 'la'.
+3- Le programme 'ls' se situe dans "/usr/bin/ls"
+4- Il n'y a pas d'entrée pour 'll', car il s'agit d'un alias créé pour 'ls -l'
+5- La commande pour afficher le contenu du dossier "bin" est 'ls /bin'
+6- La commande 'ls' liste le contenu du répertoire actuel, hors fichiers et dossiers cachés
+7- La commande "pwd" donne le chemin complet du dossier courant
+8- La commande 'echo 'bip' > plop' crée un fichier "plop" et le remplit avec le contenu à afficher. Il écrase également toute donnée précédente.
+9- La commande ""echo 'bip' >> plop" écrit à la suite du fichier passé en paremètre, ici deux fois "plop" à la fin du fichier plop
+10- La commande "sleep 10|echo 'toto' patiente 10 s puis affiche le texte passé en paramètre, ici toto
+11- La commande 'file' permet de renvoyer le type d'un fichier passé en paramètre
+12- En créant un lien via "ln X Y", on crée un lien vers le fichier original. Cette commande crée un lien physique, qui copie le contenu du fichier original
+13- Avec "ln -s", on crée un lien symbolique,  qui pointe vers le fichier référencé, et est donc dépendant de l'état du fichier original. En cas de suppression du fichier original, le lien devient invalide car il ne pointe plus sur le fichier
+14- L'affichage avec "cat" permet d'afficher à l'ecran un fichier, interrompu par la touche 'arret defil'
+15- La commande "head n -5 FICHIER" permet d'afficher les 5 premières lignes d'un fichier passé en paramètre. De meme pour "tail n -5" pour les 5 dernières lignes, et pour les lignes 10 à 15, on peux utiliser "sed -n '5,10p' FICHIER" (-n pour désactiver l'afichage automatique et 'p' à la fin pour lui ordonner d'afficher le résultat)
+16- La commande "dmesg|less" affiche le contenu du buffer du kernel, et permet de le parcourir avec 'less'
+17- Le fichier passwd contient la liste des utilisateurs avec des détails sur leur login, leur dossier personnel sur le disque, et d'autres informations relatives aux utilisateurs. la commande "man passwd.5" affiche la page de man relative à ce fichier
+18- La commande "cat /etc/passwd | cut -d ':' -f "1" | sort -dr
+19- La commande 'wc -l /etc/passwd' permet d'afficher le nombre d'utilisateurs ayant un compte sur la machine
+20- La commande 'apropos -e conversion | wc -l' permet de compter le nombre de pages de manuel ayant le mot-clé "conversion" dans leur description
+21- La commande 'find passwd' permet de rechercher tout les fichiers nommés passwd sur la machine
+22- La commande 'find passwd >>~/list_passwd_files.txt 2>>/dev/null' permet de rechercher tout les fichiers nommés passwd sur la machine et de les rediriger séparément
+23- La commande 'grep -r -e 'll' -f ~' permet de rechercher dans les dossiers et sous dossiers du répartoire personnel pour l'alias 'll'
+24- La commande 'locate history.log' est utilisée pour trouver le fichier history.org
+25- Le fichier nouvellement créé n'apparait pas via 'locate', car cette dernière utilise une base de données de fichiers qui est mise à jour de manière journalière par le système. On peux utiliser la commande updatedb pour faire la mise à jour de la base
+
+### Personnalisation du shell
+
+Modification de l'affichage de l'invité de commande avec [des exemples de couleur](https://misc.flogisoft.com/bash/tip_colors_and_formatting):
+avec un affichage sous la forme: [heure] - user@host:chemin_courant$
+\[\e[31m\][\A] - \[\e[32m]\u@\h[\e[0m\]:\[\e[36m\]\w\[\e[0m\]"
+- "\[\e[31m\][\A]" sert à placer l'heure (\A) en rouge (code 31m) entre crochets
+- "\[\e[32m]\u@\h[\e[0m\]:" sert à colorer le nom de l'utilisateur (\u) et de la machine (\h) en vert (code 32m), puis d'afficher ":" sans coloration (via [\e[0m\])
+- "\[\e[36m\]\w\[\e[0m\]" sert à afficher le chemin courant (\w) en cyan (code 36m), puis à effacer toute mise en forme subséquente ([\e[0m\])
