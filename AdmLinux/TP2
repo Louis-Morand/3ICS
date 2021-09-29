@@ -2,9 +2,9 @@
 
 # **Administration système** 
 
-## TP2 - BASH
+# TP2 - BASH
 
-### Ex 1- Variables d'environnement
+## Ex 1- Variables d'environnement
 
 1-Les commandes tapées par l'utilisateur sont situés dans le dossier ~/.bash_history.
 
@@ -26,7 +26,7 @@
 
 10-La commande "echo '$HOME' = $HOME" permet d'afficher "$HOME = /home/louis".
 
-### Ex2- Contrôle de mot de passe
+## Ex2- Contrôle de mot de passe
 
 >#!/bin/bash
 >
@@ -44,7 +44,7 @@
 >testpwd.sh (END)
 
 
-### Ex3- Expressions rationnelles
+## Ex3- Expressions rationnelles
 
 >#!/bin/bash
 >
@@ -75,7 +75,7 @@
 >       fi
 >testreel.sh (END)
 
-### Ex4- Contrôle d’utilisateur
+## Ex4- Contrôle d’utilisateur
 
 >#!/bin/bash
 >
@@ -90,7 +90,7 @@
 >       fi
 Ici, l'option "-z" permet de tester si la chaine passée est vide, et "Grep -q" permet de ne pas afficher les résultats sur la sortie standard.
 
-### Ex5- Factorielle
+## Ex5- Factorielle
 
 >#!/bin/bash
 >
@@ -103,7 +103,7 @@ Ici, l'option "-z" permet de tester si la chaine passée est vide, et "Grep -q" 
 
 
 
-### ex6- Le juste prix
+## ex6- Le juste prix
 
 >#!/bin/bash
 >
@@ -125,7 +125,7 @@ Ici, l'option "-z" permet de tester si la chaine passée est vide, et "Grep -q" 
 >               fi
 >       done
 
-### Ex7- Statistiques
+## Ex7- Statistiques
 
 #### 7.1- Affiche min, max et moyenne de 3 nombres passés en paramètres
 
