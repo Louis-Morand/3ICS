@@ -1,0 +1,236 @@
+Ex 1-
+1-Les scrpits sont situés dans le dossier ~/.bashrc
+2-La variable d'environnement "HOME", accessible via "env", est la variable d'environnement qui permet à la commande cd passée sans arguments de ramener dans le répertoire personnel
+3-la variable LANG permet de préciser la langue d'affichage du caractères du shell, PWD spécifie le dossier courant, OLDPWD permet de préciser le répertoire précédent dans lequel était l'utilisateur, et shell permet de spécifier le shell courant de l'utilisateur
+4- La variable existe mais n'est pas listée dans env
+5-la commande "Bash" ouvre un autre terminal de commande bash, dans laquelle la commande "MY_VAR" n'existe pas, car elle n'a pas été ajoutée aux variables d'environnement.
+6-Suite à l'ajout de la commande vis à vis du fichier bashrc, la commande est intégrée dans l'environnement shell de l'utilisateur, et est donc qccessible dans les différents shell de l'utilisateur
+9-La commande "unset" permet de supprimer l'affectation d'une variable et de permettre sa réutilisation.
+10-La commande echo '$HOME' = $HOME permet d'afficher "$HOME = /home/louis"
+
+Ex2
+ex2-MDP
+#!/bin/bash
+
+
+mdpF='123+aze'#!/bin/bash
+
+
+mdpF='123+aze'
+read -s -p 'Saisir un mot de passe: ' mdpU
+
+if [ $mdpU = $mdpF ]; then
+        echo "Mots de passe ok"
+else
+        echo "Mot de passe incorrect"
+fi
+testpwd.sh (END)
+
+
+Ex3- ExpRat
+#!/bin/bash
+
+function is_number()
+{
+        re='^[+-]?[0-9]+([.][0-9]+)?$'
+
+        if ! [[ $1 =~ $re ]]; then
+                return 1
+        else
+                return 0
+        fi
+}
+
+read -p "rentrez un paramètre: " nb
+
+is_number $nb
+
+if [ $? -eq 0 ];then
+        echo "nombre réel"
+else
+        echo "Erreur: Nombre non réel"
+fi
+testreel.sh (END)
+
+Ex4-Controle user
+#!/bin/bash
+
+nomFichier=$(basename $0)
+
+
+if [ -z "$1" ]; then
+        echo "Utilisation: $nomFichier nom_utilisateur"
+        exit 1
+elif  grep -q "$1" /etc/passwd; then
+        echo "Utilisateur existe"
+else echo "utilisateur n'existe pas"
+fi
+
+
+
+Ex5-Factorielle
+#!/bin/bash
+
+nb=1
+
+for i in $(seq $1); do
+        nb=$(("$nb"*"$i"))
+done
+echo $nb
+
+
+
+ex6-Juste Prix
+#!/bin/bash
+
+Resultat=$(( 1+ $RANDOM %1000 ))
+
+echo $Resultat
+while [ "$val" != "$Resultat" ]
+do
+        read -p 'Saisir une valeur :' val
+        if [ $val -lt $Resultat ];then
+                echo "C'est plus !"
+        fi
+        if [ $val -gt $Resultat ];then
+                echo "C'est moins !"
+        fi
+        if [ $val -eq $Resultat ];then
+                echo "C'est gagné !"
+        fi
+done
+
+Ex7- Stats
+7.1
+#!/bin/bash
+
+
+function is_number()
+{
+        re='^[+-]?[0-9]+([.][0-9]+)?$'
+
+        if ! [[ $1 =~ $re ]]; then
+                return 1
+        else
+                return 0
+        fi
+}
+
+min=200
+max=-200
+for i in "$@"; do
+        is_number $i
+
+        if [ $? -eq 0 ];then
+                echo "nombre réel"
+        else
+                echo "Erreur: Nombre non réel"
+        fi
+
+        if [ "$min" -gt "$i" ];then
+                min="$i"
+        fi
+
+        if [ "$max" -lt "$i" ]; then
+                max="$i"
+        fi
+done
+
+moy=$(( ("$1"+"$2"+"$3") /3 ))
+
+echo "min=$min, max=$max, moy=$moy"
+
+
+7.2
+#!/bin/bash
+function is_number()
+{
+        re='^[+-]?[0-9]+([.][0-9]+)?$'
+
+        if ! [[ $1 =~ $re ]]; then
+                return 1
+        else
+                return 0
+        fi
+}
+min=200
+max=-200
+moy=0
+nb=0
+for i in "$@"; do
+        is_number $i
+
+        if [ $? -eq 0 ];then
+                echo "nombre réel"
+        else
+                echo "Erreur: Nombre non réel"
+        fi
+
+        if [ "$min" -gt "$i" ];then
+                min="$i"
+        fi
+
+        if [ "$max" -lt "$i" ]; then
+                max="$i"
+        fi
+done
+
+while (("$#")); do
+        moy=$(( "$moy"+"$1" ))
+        shift
+        nb=$[$nb +1]
+done
+moy=$(( "$moy"/"$nb" ))
+
+echo "min=$min, max=$max, moy=$moy"
+
+7.3
+
+#!/bin/bash
+
+
+function is_number()
+{
+        re='^[+-]?[0-9]+([.][0-9]+)?$'
+
+        if ! [[ $1 =~ $re ]]; then
+                return 1
+        else
+                return 0
+        fi
+}
+
+min=200
+max=-200
+moy=0
+nb=0
+
+read -p "Entrez les valeurs: " -a Table
+
+
+for i in "${tab[@]}"; do
+        is_number $i
+
+        if [ $? -eq 0 ];then
+                echo "nombre réel"
+        else
+                echo "Erreur: Nombre non réel"
+        fi
+
+        if [ "$min" -gt "$i" ];then
+                min="$i"
+        fi
+
+        if [ "$max" -lt "$i" ]; then
+                max="$i"
+        fi
+done
+
+while (("$#")); do
+        moy=$(( "$moy"+"$1" ))
+        shift
+        nb=$[$nb +1]
+done
+moy=$(( "$moy"/"$nb" ))
+
+echo "min=$min, max=$max, moy=$moy"git
