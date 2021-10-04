@@ -1,0 +1,93 @@
+### Louis MORAND
+# **Administration système** 
+
+# TP3 - Gestion des paquets
+
+## Exercice 1. Commandes de base
+
+1-La mise à jour système se fait via "sudo apt-get dist-upgrade" pour le systeme, et sudo "sudo apt-get update & sudo apt-get upgrade" pour les packets
+
+2-Pour avoir un alias maj pour les mises à jour, il faut enregistrer dans ~./bashrc la commande "sudo apt-get dist-upgrade ; sudo apt-get update ; sudo apt-get upgrade"
+
+3-Les 5 derniers packets renvoyés par "less /var/log/dpkg.log | grep installed" sont mime-support, man-db, systemd,libprocps8, libc-bin
+
+4-La commande less /var/log/apt/history permet de trouver les derniers packets explicitements installés avec apt-install, soit open-vm tools.
+
+5-La commande "dpkg --get-selections | wc --lines donne 601 ET apt-cache pkgnames | wc --lines donne 66215
+--get-selection" affiche tout les packets sauf les purgés, et "apt-cache pkgnames" donne le nom de chaque paquet connu d'apt.
+
+6-La commande "apt-cache" permet de lister tout les packets connus d'apt. Donc la commande "sudo apt-cache pkgnames |wc -l" donne le nombre de packets disponibles,soit: 66587 paquets.
+
+7-Avec "apt-cache show X", où X est le nom du packet, on peux voir les informations relatives à un paquet.
+Appliqué au packet glance, on peux voir que ce dernier sert à la gestion d'images de VM à travers le cloud, que tldr permet d'enrichir et simplifier les pages man avec des exemples, et que hollywood permet de modifier l'affichage de la console pour lui permettre d'obtenir un rôle dans un prochain film d'Hollywood en remplissant l'affichage de la console de clichés sur les terminaux linux.
+
+8-Les paquets permettant de jouer au sudoku sont, d'après retournés par "apt-cache search sudoku": ksudoku, gnomesudoku, entre autres.
+
+### Ex2-
+
+La commande ls est installée à partir du packet coreutils. On peux trouver ceci en cherchant le dossier d'installation de ls via "which ls", qui renvoie "/usr/bin/ls". Ensuite, on recherche via dpkg, avec "dpkg -S /bin/ls", -S permettant une recherche via nom de fichier, qui renvoie "coreutils: /bin/ls". 
+
+Le script résultant est:
+> #!/bin/bash
+>
+>retour=$(dpkg-query -l $1 2> /dev/null | sed '1,5d' | cut -d " " -f1)
+>
+>if [ "$retour" == "ii" ];then
+>        echo "INSTALLE"
+>else
+>echo "NON INSTALLE"
+>
+>fi
+
+### Ex3-
+>#!/bin/bash
+ >
+>path=$(which $1)
+>#echo $path
+>
+>#forme=$(cut -d'/' -f3- $path)
+>forme=$(echo $path | cut -d'/' -f3-)
+>
+>dpkg -S $(which "/$forme") | grep -e ":"
+>origine-commandes (END)
+
+### Ex4-
+La commande pour lister le contenu installé par un package est "dpkg-query -L PackageName", l'option -l ne listant que le statut du package.
+Ici, [ est la commande de test pour évaluer des conditions. Comme toute commande elle a une page man.
+
+### Ex5-
+
+Aptitude est un manager de paquets qui ajoute, entre autres, une interface utilisateur en plus par rapport à apt.
+Lynx est un navigateur basé sur du texte, et emacs est un éditeur de texte.
+
+### Ex6-Installation d'un paquet par PPA
+
+Le fichier créé dans /etc/apt/sources.list.d contient l'adresse du dépot java contenant les sources pour java.
+
+### Ex7- Installation d'un logiciel à partir du code source
+
+Avec checkinstall, le fichier est compilé localement, et les valeurs de maintainer et autres informations relatives au package sont modifiables et basées sur celles de l'utilisateur.
+On peux désormais installer le package avec sudo dpkg-i cbonsai après l'avoir compilé localement via "sudo checkinstall", qui, à partir du makefile donné, donne un package avec l'extension .deb
+
+### Ex8- Creation d'un depot personnalisé
+
+La commande "dpkg-deb --build origine-commande" crée un paquet nommé origine-commande.db
+dpkg-deb est le manipulateur de paquet de debian, --build permet de créer l'archive, -I permet d'avoir des informations à propos d'un package, comme sa taille ou sa version.
+
+#### Creation depot personnel reprepo
+
+1-Pour trouver la release du poste, utiliser lsb_release -a, qui donne des infos sur la release du poste
+
+2- Reprepro, exécutable non natif linux, sert à gérer une repo local de packages.
+Ici, reprepro -b sert à spécifier un dossier comme étant dossier par défaut pour les autres dossiers.
+pour inclure le package:  "reprepro -b . includedeb focal origine-commande.deb".
+
+Cependant, en reconfiguration via package maison, apt refuse de la prendre en compte car il est non signé, et présente donc des problèmes de sécurité.
+
+#### Signature du depot avec GPG
+
+1-Pour permettre de signer le dépot, on crée une nouvelle clef avec "gpg --gen-key", puis on rajoute une authentification par clef dans le fichier 'distribution' du depot via le rajout de la ligne "SignWith:yes".
+Puis, ajout de la clef au depot via "reprepro --ask-passphrase -b . export" (ou via gpg pour plus de sécurité, la clef est crée en clair ici).
+Ensuite, creation de la clef publique et ajout au depot via : "gpg --export -a "NomAuteur" > public.key"
+Enfin, ajout de la clef à la liste des clef connues via "sudo apt-key add public.key".
+Puis mise à jour via "sudo apt update", pour prendre en compte la clef de certification du depot crée, et certifier le depot.
