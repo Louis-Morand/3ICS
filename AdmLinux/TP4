@@ -1,0 +1,119 @@
+Ex1-
+la commande groupadd permet de créer des groupes, avec la possibilité de donner un numéro, mot de passe...
+
+2-La commande "useradd" permet soit de modifier les infromations d'un utilisateur, soit d'en créer un nouveau.
+permet notemment de spécifier via l'option "-f 0" de le désactiver directement, ou alors en nombre de jours.
+l'option "-b" permet de spécifier leur répertoire de base
+l'option "-d" permet de spécifier le répertoire personnel, non créé automatiquement
+l'option "-g" permet de spécifier un groupe à l'utilisateur via nom ou numéro de groupe.
+l'option "-G" permet de spécifier des groupes supplémentaires pour l'utilisateur
+l'option "-s" permet de spécifier le nom du shell utilisateur
+l'option "-m" permet de créer le répertorie de base de l'utilsiateur
+
+3-
+"useradd -d /home/alice -m -g dev -s /bin/bash alice" Pour créer alice, son dossier home, et la rajouter au groupe
+"useradd -d /home/charlie -m -g infra -s /bin/bash charlie"
+"useradd -d /home/bob -m -g dev -G infra -s /bin/bash bob"
+"useradd -d /home/dave -m -g dev -G infra -s /bin/bash dave"
+
+4-Pour les groupes d'un utilsateur: "id USER"
+Pour les groupes généraux, via "getent group GROUP", getent utilise la librairie de nom du système pour retrouver
+Ou via une recherche dans /etc/group" et un grep du nom du groupe"
+
+5-Pour changer le groupe propriétaire d'un dossier ou fichier,
+on peux utiliser la commande "chgrp -R NOMGROUPE NOMFICHIER"
+Donc via "sudo chgrp -R dev /home/alice", "sudo chgrp -R dev /home/bob", "sudo chgrp -R infra /home/charlie" et "sudo chgrp -R infra /home/charlie"
+
+6-Pour remplacer le groupe primaire, on utilise "usermod"
+Ici, pour le groupe primaire, "usermod -g GROUPE USER"
+en l'occurence, "sudo usermod -g dev alice", "sudo usermod -g dev bob"
+"sudo usermod -g infra charlie" sudo usermod -g infra dave"
+
+7-pour l'edition des permissions via chmod:
+chmod fonctionne via permissions sur le dossier:
+Selon la forme rwx, et u (propriétaire), g (group), o (others),a (tous)
+Pour permettre aux membres du groupe d'ecrire dans le dossier:
+
+d'abord mettre le groupe prorpiétaire du dossier via "chgrp -R infra infra/" et "chgrp -R dev dev/"
+puis mettre à jour les permissions sur le dossier et les enfants:
+chmod -R g+rx pour la lecture ecriture du groupe
+
+8-chmod -t pour renommer et supprimer pour le propriétaire seulement
+Car -t permet l'activation du sticky bit, qui précise que seul le prorpio ou root peux renommer ou supprimer un fichier
+sudo chmod -R 1755
+
+9-On ne peux pas ouvrir de session en tant qu'alice, car ce compte n'a pas de mot de passe
+
+10-Apres mise en place d'un mot de passe pour alcie avec "sudo passwd alice", on peux désormais se connecter via "su alice"
+
+11-La commande "id alice" permet d'obtenir les uid et gid d'alice
+
+12-La commande "id 1003" permet d'obtenir l'utilisateur avec l'id 1003
+
+13-La commande "getent group GROUP | cut -d: -f3" permet d'afficher l'id du groupe donné
+le groupe dev a l'id 1001
+
+14- On peux vérifier l'id d'un groupe via "id -ng X", ou X est l'id du groupe.
+Le groupe dev a l'id 1002
+
+15-La commande gpasswd permet de gérer les groupes.
+Ici, la commande "sudo passwd -d charlie infra" retire charlie du groupe infra, tel que vu via getent group infra
+Lers changements sont appliqués au prochain redémarrage.
+La commande deluser ne fonctionne pas car elle dispose d'une protection vis à vis des groupes primaires que n'a pas gpasswd
+
+16- Les options relatives à la gestion des mots de passe utilsiateur se font via chage
+"sudo chage -E 2021-06-01 -M 90 -m 5 -W 14 -I 30 dave"
+-I pour le nombre de jours après expiration avant verouillage compte
+-m pour nb de jours avant changement mots de passe
+-M pour le nombre de jours de validité du mot de passe
+-E pour date d'expiration du mdp, au format YYYY-MM-DD
+-W pour une alerte X jours avant que le mot de passe expire
+La vérification de l'application des paramètres se fait via "sudo chage -l dave"
+
+17-On peux vérifier le shell d'un utilisateur dans /etc/passwd
+En l'occurence, "less /etc/passwd | grep root" nous permet de voir que le shell de root est bash
+
+18-Le user nobody est un compte sans shell utilisé par certains daemon, qui est utilisé pour des mesures de sécurité
+
+19-Par défaut, comme spécifié dans par le man de sudoers, sudo conserve un mot de passe en mémoire pendant 15 min.
+Pour forcer sudo à oublier le mot de passe, on utilise "sudo -k", qui force un reset du timestamp utilisé pour le compte du mot de passe
+
+
+
+Ex2-
+1-Les droits sur dossier sont rwxrwxr-x et de rw-rw-r sur le fichier
+
+2-Meme en retirant tout les droits, un affichage en tant que root est possible
+
+3-En essayant de remplacer le contenu du fichier via "echo "TEST">fichier", la commande est exécutée, mais nous ne pouvons pas lire le fichier.
+Les commandes tapées d'un utilisateur sont passées via les permissions de l'utilisateur relatif à la cible de la commande.
+
+4-Une exécution normale du fichier ne fonctionne pas, mais fonctionne avec sudo.
+Une commande pasée avec sudo est exécutée avec les permissions root, donc surpasse les droits des fichiers.
+
+5- Le drit de lecture sur un dossier empeche de lister son contenu, mais ne protege pas de l'execution ou de la modification du contenu.
+
+6-Les droits d'accès (rwd) sont hérités depuis le dossier parent, sauf en cas de conflit entre les droits où les droits locaux du fichier/dossier vont s'appliquer
+
+7-Pour les répertoires, un droit d'exécution empeche de rentrer dans le dossier, et bloque donc tout accès utilisateur à son contenu (hors root)
+
+8-Meme en etant dans un dossier sans exécution, on peux retourner dans le répertoire parent mais pas lister son contenu.
+Les droits du répertoire courant sont issus du répertoire parent de ce dernier.Cependant, on peux toujours revenir avec "cd ..". Cd est une commande d'environnement, elle s'exécute en faisant abstraction des droits des dossiers
+
+9-Pour qu'une autre personne du groupe puisse accéder en lecture mais pas écriture, on peux attribuer les droits via "chmod g+3 FICHIER"
+
+10-Un umask tres restrictif interdisant à tous l'acces en lecture, écriture, traversée est umask 077
+
+11-Un umask tres permissif permettant à tous de lire les fichiers et répertoires, mais n'autorise que le propriétaire à écrire est "umask 022"
+
+12-Un umask équililibré m'autorisant unaccès complet et autorisant un accès en lecture aux
+membres de votre groupe est "umask 027"
+
+13-Transcrire en octal ou classique:
+- "chmod u=rx,g=wx,o=r fic" : chmod 654 fic
+- "chmod uo+w,g-rx fic" en sachant que les droits initiaux de fic sont r--r-x--- :"chmod 603 fic"
+- "chmod 653 fic" en sachant que les droits initiaux de fic sont 711 : "chmod u+rw,g+rx,o+wx"
+- "chmod u+x,g=w,o-r fic" en sachant que les droits initiaux de fic sont r--r-x---: "chmod 520 fic" 
+
+14-Les droits du programme passwd sont 755, et du fichier passwd 0644.
+Le programme passwd peu etre exécuté par chaque utilisateur pour modifier son mot de passe, mais le fichier passwd ne peux etre modifié que par le systeme.
