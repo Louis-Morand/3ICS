@@ -1,0 +1,144 @@
+### Louis MORAND
+# **Administration système** 
+
+## TP5 - Services réseau
+
+### Ex1- Adressage IP (Rappels)
+
+Reseau 172.16.0.0/23, parc de 254 machines, 7 sous-réseaux voulus
+
+SR1: 52 machines(2^6 hotes, 64 hotes):
+- Masque:/26
+- @SR:172.16.0.0/26 
+- 1er addr: 172.16.0.1/26 
+- dern addr: 172.16.0.62 
+- @B:172.16.0.63
+
+SR2: 38 machines(2^6, 64 hotes):
+- Masque:/26
+- @SR:172.16.0.64/26
+- 1ere addr: 172.16.0.65/26
+- dern addr:172.16.0.126
+- @B:172.16.0.127
+
+SR3: 37 machines(2^6, 64 hotes):
+- Masque:/26
+- @SR:172.16.0.128
+- 1ere addr: 172.16.0.129
+- dern addr: 172.16.0.190
+- @B:172.16.0.191
+
+SR4: 35 machines(2^6, 64 hotes):
+- Masque:/26
+- @SR:172.16.0.192
+- 1ere addr:172.16.0.193
+- dern addr: 172.16.0.254
+- @B: 192.16.0.255
+
+SR5: 34 machines(2^6, 64 hotes):
+- Masque:/26
+- @SR:172.16.1.0
+- 1ere addr: 172.16.1.1/26
+- dern addr: 172.16.1.62
+- @B:172.16.1.63
+
+SR6: 33 machines(2^6, 64 hotes)
+- Masque:/26
+- @SR:172.16.1.64/26
+- 1ere addr: 172.16.1.65/26
+- dern addr: 172.16.1.129
+- @B:172.16.1.127
+
+SR7: 25 machines(2^5, 32 hotes)
+- Masque:/26
+- @SR:172.16.1.128
+- 1ere addr: 172.16.1.129/26
+- dern addr: 172.16.1.190
+- @B:172.16.1.191
+
+
+### Ex2 - Preparation de l'environnement
+
+2- L'interface lo correspond à l'interface locale de loopback, qui permet à la machine d'écouter sur ses propres ports, via l'adresse 127.0.0.1.
+
+CONFIG VIA NETPLAN 
+
+3-La desinstallation du paquet cloud-init se fait via la commande "apt-get purge cloud-init".
+
+4-La commande "sudo hostnamectl set-hostname NOM" permet de modifier le nom des machines en NOM. En l'occurrence, on veux qu'elles appartiennent au réseau "tpadmin.local', il faudra donc els renommer NOM.tpadmin.local.
+Egalement, il se peut que le nom n'ait pas changé dans /etc/hostnames, associé à l'adresse 127.0.0.1, il faut donc égelement le changer dans ce fichier.
+
+### Ex3- Installation du serveur DHCP
+
+2-L'attribution de l'adresse ip interne se fait via la commande "sudo ip addr 192.168.100.1/24 dev ens192",
+et modif du fichier puis activation de l'interface par "sudo ip link set ens192 up". De plus, modifier le fichier "/etc/netplan" pour mettre l'adresse voulue suur l'interface, puis appliquer la configuration avec "netplan apply"
+
+3- Les lignes "default-lease time" et "max-lease-time" du fichier /etc/dhcp/dhcpd.conf" permettent de spécifier le temps de pret minium et maximal d'une adresse par le serveur, le subnet est l'adresse et la configuration des IP à distribuer sur le réseau.
+
+4-L'interface d'ecoute du serveur à préciser dans "/etc/default/isc-dhcp-server" est l'interface etc192, soit l'interface commune avec la machine client. Ceci lui permet de spécifier directement une interface sur laquelle écouter plutot que d'ecouter sur toutes les interfaces par défaut.
+
+5-La commande "dhcpd -t" permet de tester la configuration donnée avant de démarrer le serveur via "systemctl restart isc-dhcp-server".
+
+7-Les messages "DHCPDISCOVER,DHCPOFFER,DHCPREQUEST,DHCPACK" trouvés via tail -f /var/log/syslog sont les messages relatifs à l'échange client/serveur DHCP pour obtenir une IP.
+
+Le "DHCPDISCOVER" est envoyé par le client pour identifier les serveurs pouvant donner une adresse, DHCPOFFER est la réponse du serveur DHCP au discover avec une premiere offre d'adresse, DHCPREQUEST est la requete de l'hote pour une IP au serveur, et DHCPACK est la réponse serveur contenant les paramètres clients
+
+8- Le fichier "/var/lib/dhcp/dhcpd.leases" contient l'historique des adresses pretées, et la commande "dhcp-lease-list" renvoie l'ensemble des adresses pretées au moment de la commande.
+
+10-pour appliquer une Ip statique au client, il faut la spécifier dans le fichier "/etc/dhcp/dhcpd" avec la configuration:
+>host client {
+>    hardware ethernet XX:XX:XX:XX:XX:XX; #remplacer par l'adresse MAC
+>fixed-address 192.168.100.20;
+>}
+
+### Ex4 - Donner acces à internet au client
+
+1-Pour permettre àla machine d'avoir accès à internet, il faut activer l'ip forwarding, qui se fait via en décommentant la ligne net.ipv4.ip_forward=1" dans le fichier "/etc/sysctl.conf", 
+puis en forcant une mise à jour des règles de routage via "sudo sysctl -p /etc/sysctl.conf".
+
+2-Ensuite, ilf aut mettre en place le masquereading via:
+"sudo iptables --table nat --append POSTROUTING --out-interface enp0s3 -j MASQUERADE".
+
+### Ex5 - Installation du serveur DNS
+
+1-La mise en place d'un serveur DNS se fait via le packet bind9, avec modification de son fichier de configuration pour y inclure les forwaders, soit les serveurs DNS publics, comme "8.8.8.8 ou 9.9.9.9", en modifiant le fichier "/etc/bind/named.conf.local". Ceci permet juste de mettre en place un envoi des requetes dns aux serveurs configurés, et non d'en mettre un en place pour le domaine local.
+
+Ensuite, application des paramètres via "sudo systemctl restart bind9".
+
+
+### EX6-DNS LOCAL
+
+La mise en place d'un DNS locale permet de résoudre les noms des machines du réseau local, et de gérer lcoalement le DNS, par exemple en rajoutant des interdictions.
+
+1-Modification du fichier '/etc/bind/named.conf.local' pour qualifier le serveur en tant que serveur maitre, et spécifier sa configuration:
+
+>zone "tpadmin.local" IN {
+>
+>type master; // c'est un serveur maître
+>
+>file "/etc/bind/db.tpadmin.local"; // lien vers le fichier de définition de zone
+>
+>};
+
+2-Ensuite, création et modification du fichier "db.tpadmin.local", copie du fichier "db.local", en remplacant toutes les références à localhost par tpadmin.local, et l’adresse 127.0.0.1 par l’adresse IP du
+serveur.
+
+3-Ensuite, configuration du fichier de zone inverse, en rajoutant à la fin du fichier named.conf.local:
+>zone "100.168.192.in-addr.arpa" {
+>
+>type master;
+>
+>file "/etc/bind/db.192.168.100";
+>
+>};
+
+Puis, création du fichier "db.192.168.100" à partir du fichier "db.127", et modification de manière à remplacer toutes les références à localhost par tpadmin.local, et l’adresse 127.0.0.1 par l’adresse IP du
+serveur, en rajoutant en plus , sur la dernière ligne, l'adresse Ip du serveur, en inverse (Soit, une ip inverse est 20.100.168.192 pour le serveur).
+Ici, rajouter 20. à la fin, car le fichier s'apelle "192.168.100", et regroupe tout les dns inverses de la zone associée à ces ip.
+De plus, rajouter également une ligne pour le client sur le modèle de la ligne serveur, dans le fichier "db.tpadmin.local", pour permettre la reonnaissance du client via dns.
+
+4-La validation des configurations se fait via les commandes :
+
+- \$ named-checkconf named.conf.local
+- \$ named-checkzone tpadmin.local /etc/bind/db.tpadmin.local
+- \$ named-checkzone 100.168.192.in-addr.arpa /etc/bind/db.192.168.100

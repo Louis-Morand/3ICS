@@ -1,0 +1,50 @@
+### Louis MORAND
+# **Administration système** 
+
+## TP5 - Systèmes de fichiers, partitions et disques
+
+### Ex1 - Disques et partitions
+
+2-Pour vérifier présence d'un disque, deux options sont possibles: La commande lsblk vérifier le partitionnage des disques montés, ou le dossier /dev/, point de montage par défault.
+
+3- La commande fdisk permet de partitionner un disque via un menu en ligne de commandes.
+Elle prends en paramètre l'adresse du disque, trouvable via "lsblk -p", en l'occurrence, pour le disque sdb, "sudo fdisk /dev/sdb".
+Avec fdisk, en premier la sélection de la taille de la partition (Ici 2Go et 3Go), puis du type de partition, et enfin application de la configuration.
+
+4-La commande mkfs permet de créer un système de fichier sur une partition donnée. En l'occurrence, pour partitionner les deux secteurs créés, via la commade "sudo mkfs /dev/sdb_1" et sudo mkfs /dev/sdb_2"
+
+5-La commande df permet de  remonter la quantité d'espace disque disponible, notamment de tout le système de fichier monté sur le poste si aucun nom de fichier n'est passé.
+Ici, la commande "df -T", qui permet d'afficher en plus le type de système de fichier, mais ne fonctionne pas sur le disque nouvellement partitionné car ce dernier n'est pas monté sur le poste.
+
+6-Pour permettre de monter automatiquement les partitions au démarrage, il faut éditer le fichier "/etc/fstab".
+Il faut y rajouter l'UUID du disque voulu, trouvable via "ls /dev/disk/by-uuid", ou via  "lsblk -f".
+Puis, dans le fichier /etc/fstab, rajouter l'UUID, le système de fichier, les options (defaults par défault), les options de dump et de pass (0 par défault).
+
+### Ex2- Partitionnement LVM
+
+2-La commande "umount CHEMIN" permet de démonter les systemes de fichiers montés au chemin passé (passe aussi avec la commande "umount DISQUE")
+Ensuite, il faut remonter une partition de type LVM via fdisk, en sachant qu'une une partition LVM est de type 8e sous fdisk(accessible via "l", pour la liste des types de partition").
+
+3-Apres la creation de la partition LVM, il faut initialiser un nouveau volume LVM physique sur le disque pour permettre de l'identifier comme appartenant à LVM, ce qui se fait via la commande "sudo pvcreate /dev/sdb1".
+La verification se fait via la commande "pvdisplay", qui affiche les infomations sur tout les volumes physiques.
+LVM trie les partitions en trois groupes, avec leurs commandes associées: 'pv' pour les volumes physiques, 'vg' pour les groupes de volumes et 'lv' pour les volumes logiques.
+
+4-La commande "vgcreate" permet de créer un groupe de volumes pour gérer les disques de maniere groupée.
+La commande "vgcreate vg1 /dev/sdb1" permet donc de créer un groupe nommé vg1 composé du volume /dev/sdb1.
+La commande "vgdisplay" permet de vérifier les groupes de volume existants.
+
+5-La commande lvcreate permet de créer un volume logique dans un groupe physique.
+Ici, la commande "lvcreate -l 100%FREE -n lvData vg01" permet de créer un nouveau volume logique ayant pour nom lvData usant 100% de l'espace libre du groupe de volumes vg01.
+
+6-Pour créer une partition en ext4 à partir du volume logique:
+- "sudo mkfs.ext4 /dev/mapper/vg01-lvData".
+
+Puis éditer le fichier "/etc/fstab/" pour le rajouter "/dev/disk/by-uuid/UID-DISK /win ext4 defaults 0 0"
+/win étant le point de montage, defaults les options, 0 et 0 le dump et le pass, et ext4 le système de fichier.
+
+7-8-Creation de la nouvelle partition de disque avec "sudo fdisk /dev/sdc"
+Puis ajout de la partition lvm via "pvcreate /dev/sdc1".
+Ensuite, extension du groupe de disque avec la commande "vgextend vg01 /dev/sdc1" pour rajouter le nouveau disque au grouped de volume vg01.
+
+9- La commande "sudo lvextend -l +100%FREE /dev/vg01/lvData" permet d'agrandir le volume logique lvData au maximum de sa capacité de stockage.
+Le volume nouveau volume doit avoir été rajouté au groupe de volumes pour permettre cette commande.
